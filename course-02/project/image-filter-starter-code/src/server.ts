@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import * as jwt from 'jsonwebtoken';
 
 (async () => {
 
@@ -28,6 +29,40 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
+  app.get("/filteredimage", async(req, res) => {
+    if (!req.headers || !req.headers.authorization){
+      return res.status(401).send({ message: 'No authorization headers.' });
+    }
+  
+    const token_bearer = req.headers.authorization.split(' ');
+    if(token_bearer.length != 2){
+        return res.status(401).send({ message: 'Malformed token.' });
+    }
+    
+    const token = token_bearer[1];
+    jwt.verify(token, "hello", (err, decoded) => {
+      if (err) {
+        return res.status(500).send({ auth: false, message: 'Failed to authenticate.' });
+      }
+    });
+
+    const image_url = req.query.image_url;
+      if (!image_url) {
+        return res.status(400).send({message: 'No image url specified'});
+      }
+
+    const image_file = await filterImageFromURL(image_url);
+    if (!image_file) {
+      return res.status(400).send({message: 'filterImageFromURL failed to process: ' + image_url});
+    }
+    
+    res.sendFile(image_file, (err) => {
+      if (!err) {
+        deleteLocalFiles([image_file]);
+        console.log('deleting local file: ' + image_file);
+      }
+    })
+  });
 
   //! END @TODO1
   

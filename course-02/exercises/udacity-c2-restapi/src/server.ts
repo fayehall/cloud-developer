@@ -7,6 +7,10 @@ import bodyParser from 'body-parser';
 
 import { V0MODELS } from './controllers/v0/model.index';
 
+import { config } from './config/config';
+
+
+
 (async () => {
   await sequelize.addModels(V0MODELS);
   await sequelize.sync();
@@ -30,6 +34,15 @@ import { V0MODELS } from './controllers/v0/model.index';
     res.send( "/api/v0/" );
   } );
   
+  app.get("/filteredimage", async(req, res) => {
+    const image_url = req.query.image_url;
+    if (!image_url) {
+      return res.status(400).send({message: 'No image url specified'});
+    }
+
+    const filteredimage = 'http://' + config.dev.aws_image_server + '/filteredimage?image_url=' + image_url;
+    res.redirect(filteredimage);
+  });
 
   // Start the Server
   app.listen( port, () => {
