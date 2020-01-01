@@ -35,7 +35,7 @@ import { config } from './config/config';
   } );
   
   app.get("/filteredimage", async(req, res) => {
-    const image_url = req.query.image_url;
+    let image_url: string = req.query.image_url;
     if (!image_url) {
       return res.status(400).send({message: 'No image url specified'});
     }
