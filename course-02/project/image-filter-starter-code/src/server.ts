@@ -30,23 +30,7 @@ import * as jwt from 'jsonwebtoken';
 
   /**************************************************************************** */
   app.get("/filteredimage", async(req, res) => {
-    if (!req.headers || !req.headers.authorization){
-      return res.status(401).send({ message: 'No authorization headers.' });
-    }
-  
-    const token_bearer = req.headers.authorization.split(' ');
-    if(token_bearer.length != 2){
-        return res.status(401).send({ message: 'Malformed token.' });
-    }
-    
-    const token = token_bearer[1];
-    jwt.verify(token, "hello", (err, decoded) => {
-      if (err) {
-        return res.status(500).send({ auth: false, message: 'Failed to authenticate.' });
-      }
-    });
-
-    const image_url = req.query.image_url;
+    let image_url: string = req.query.image_url;
       if (!image_url) {
         return res.status(400).send({message: 'No image url specified'});
       }
